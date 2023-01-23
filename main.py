@@ -17,9 +17,8 @@ window.show()
 
 com = QSerialPort()
 com.setBaudRate(115200)
-com.setPortName('COM4')
-#com.open(QIODevice.OpenModeFlag.ReadWrite)
 
+message = ''
 
 available_com_ports_list = QSerialPortInfo.availablePorts()
 available_com_ports_names = []
@@ -36,8 +35,8 @@ def combo_box_click():
 
 
 def com_port_open():
-    #com.setPortName(form.com_combo_box.currentText())
-    com.setPortName('COM4')
+    com.setPortName(form.com_combo_box.currentText())
+    #com.setPortName('COM4')
     com.open(QIODevice.OpenModeFlag.ReadWrite)
 
 
@@ -47,11 +46,20 @@ def com_port_close():
 
 def com_read_data():
     rx = com.readAll()
+    global message
     #rx_string = str(rx).replace('b', '').replace("'", '').split("\\")
-    rx_string = str(rx).replace('b', '').replace("'", '')
-    begining_index = rx_string.find('xaa')
-    print(rx)
-    #print('Начало:' + rx_string[begining_index:-1])
+    rx_string = str(rx).replace('b', '').replace("'", '').replace("x", '')
+    message_full = ''
+    if rx_string[0] == 'U':
+        message_full = message
+        message_full = message_full.split("\\")
+        #c = '0' + message_full[1]
+        if len(message_full) > 1:
+            c = int(message_full[2], 16)
+            print(c)
+        message = rx_string
+    else:
+        message = message + rx_string
 
 
 form.com_combo_box.currentIndexChanged.connect(combo_box_click)
