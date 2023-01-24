@@ -5,6 +5,7 @@ from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
 from PyQt6 import QtCore
 from PyQt6.QtCore import QIODevice
 from PyQt6.QtCore import QIODeviceBase
+import re
 
 
 Form, Window = uic.loadUiType("enercom_r2.ui")
@@ -45,12 +46,42 @@ def com_port_close():
 
 
 def com_read_data():
-    rx = str(com.readAll())
+    rx = str(com.readAll().toHex()).replace('b', '').replace("'", '')
     global message
+    message_full = ''
+    convert_to_hex_flag = 0
+    if rx[0] == '5' and rx[1] == '5':
+        message_full = message
+        convert_to_hex_flag = 1
+        message = rx
+    else:
+        message = message + rx
+
+    if convert_to_hex_flag == 1 and len(message_full) > 0:
+        convert_to_hex_flag = 0
+        message_full = re.findall('.{%s}' % 2, message_full)
+        message_full_int = []
+        #print(message_full)
+        i = 0
+        for el in message_full:
+            message_full_int.append(int(el, 16))
+
+        print(message_full_int)
+
+
+
+
+
+
+
+
+
+
+
 
     #rx_string = str(rx).replace('b', '').replace("'", '').split("\\")
     #rx_string = str(rx).replace('b', '').replace("'", '').replace("x", '')
-    print(rx)
+
     #if rx_string[0] == 'U':
     #    message_full = message
     #    message_full = message_full.split("\\")
